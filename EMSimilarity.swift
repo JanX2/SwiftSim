@@ -30,6 +30,7 @@
 //  SOFTWARE.
 
 import Foundation
+import Accelerate
 
 
 public typealias Sample = Double
@@ -95,20 +96,27 @@ public init() {}
     
     /** Dot Product **/
     private func dot(A: Samples, B: Samples) -> Sample {
+        //precondition(A.count == B.count)
+        
         var x: Sample = 0
-        for i in 0...A.count-1 {
-            x += A[i] * B[i]
-        }
+        
+        // C[0] = sum(A[n] * B[n], 0 <= n < N)
+        vDSP_dotprD(A, 1, B, 1, &x, vDSP_Length(A.count))
+        
         return x
     }
     
     /** Vector Magnitude **/
     private func magnitude(A: Samples) -> Sample {
+        let N = A.count
         var x: Sample = 0
-        for elt in A {
-            x += elt * elt
-        }
-        return sqrt(x)
+        
+        // C[0] = sum(A[n] * A[n], 0 <= n < N) / N
+        vDSP_measqvD(A, 1, &x, vDSP_Length(N))
+        x *= Sample(N)
+        x = sqrt(x)
+        
+        return x
     }
     
     /** Cosine similarity **/
