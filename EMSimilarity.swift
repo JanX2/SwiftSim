@@ -1,3 +1,4 @@
+
 //
 //  EMSimilarity.swift
 //  SwiftSim
@@ -31,10 +32,10 @@
 import Foundation
 
 
-typealias Sample = Double
-typealias Samples = [Sample]
+public typealias Sample = Double
+public typealias Samples = [Sample]
 
-enum EMSimilarityMode {
+public enum EMSimilarityMode {
     case Cosine
     case Tanimoto
     case Ochiai
@@ -44,29 +45,31 @@ enum EMSimilarityMode {
     case Hamming
 }
 
-enum EMVectorSizeMismatchMode {
+public enum EMVectorSizeMismatchMode {
     case Bail
     case Truncate
 }
 
-class EMSimilarity {
+public class EMSimilarity {
+public init() {}
+
     /** Similarity metric mode **/
     private var currentSimMode = [EMSimilarityMode.Cosine]
     
     /** Set the currentSimMode via push **/
-    func pushSimMode(mode: EMSimilarityMode) {
+    public func pushSimMode(mode: EMSimilarityMode) {
         self.currentSimMode.append(mode)
     }
     
     /** Pop the currentSimMode via pop if it won't make the stack empty **/
-    func popSimMode() {
+    public func popSimMode() {
         if self.currentSimMode.count > 1 {
             let _ = self.currentSimMode.popLast()
         }
     }
     
     /** Get the currently set similarity mode **/
-    func getCurrentSimMode() -> EMSimilarityMode? {
+    public func getCurrentSimMode() -> EMSimilarityMode? {
         return self.currentSimMode.last
     }
     
@@ -74,19 +77,19 @@ class EMSimilarity {
     private var currentMismatchMode = [EMVectorSizeMismatchMode.Bail]
     
     /** Set the currentMismatcMode via push **/
-    func pushMismatchMode(mode: EMVectorSizeMismatchMode) {
+    public func pushMismatchMode(mode: EMVectorSizeMismatchMode) {
         self.currentMismatchMode.append(mode)
     }
     
     /** Pop the currentMismatchMode via pop if it won't make the stack empty **/
-    func popMismatchMode() {
+    public func popMismatchMode() {
         if self.currentMismatchMode.count > 1 {
             let _ = self.currentMismatchMode.popLast()
         }
     }
     
     /** Get the currently set mistmatch mode **/
-    func getCurrentMismatchMode() -> EMVectorSizeMismatchMode? {
+    public func getCurrentMismatchMode() -> EMVectorSizeMismatchMode? {
         return self.currentMismatchMode.last
     }
     
@@ -176,7 +179,7 @@ class EMSimilarity {
      * Sample types
      * Returns the similarity results or -1.0 on caught error
      */
-    func compute(A: Samples, B: Samples) -> Sample {
+    public func compute(A: Samples, B: Samples) -> Sample {
         // get the mode
         var mode = EMSimilarityMode.Cosine
         if let _mode = self.getCurrentSimMode() {
