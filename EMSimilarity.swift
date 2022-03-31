@@ -29,6 +29,10 @@
 
 import Foundation
 
+
+typealias Sample = Double
+typealias Samples = [Sample]
+
 enum EMSimilarityMode {
     case Cosine
     case Tanimoto
@@ -86,8 +90,8 @@ class EMSimilarity {
     }
     
     /** Dot Product **/
-    private func dot(A: [Double], B: [Double]) -> Double {
-        var x: Double = 0
+    private func dot(A: Samples, B: Samples) -> Sample {
+        var x: Sample = 0
         for i in 0...A.count-1 {
             x += A[i] * B[i]
         }
@@ -95,8 +99,8 @@ class EMSimilarity {
     }
     
     /** Vector Magnitude **/
-    private func magnitude(A: [Double]) -> Double {
-        var x: Double = 0
+    private func magnitude(A: Samples) -> Sample {
+        var x: Sample = 0
         for elt in A {
             x += elt * elt
         }
@@ -104,12 +108,12 @@ class EMSimilarity {
     }
     
     /** Cosine similarity **/
-    private func cosineSim(A: [Double], B: [Double]) -> Double {
+    private func cosineSim(A: Samples, B: Samples) -> Sample {
         return dot(A: A, B: B) / (magnitude(A: A) * magnitude(A: B))
     }
     
     /** Tanimoto similarity **/
-    private func tanimotoSim(A: [Double], B: [Double]) -> Double {
+    private func tanimotoSim(A: Samples, B: Samples) -> Sample {
         let Amag = magnitude(A: A)
         let Bmag = magnitude(A: B)
         let AdotB = dot(A: A, B: B)
@@ -117,37 +121,37 @@ class EMSimilarity {
     }
     
     /** Ochiai similarity **/
-    private func ochiaiSim(A: [Double], B: [Double]) -> Double {
+    private func ochiaiSim(A: Samples, B: Samples) -> Sample {
         let a = Set(A)
         let b = Set(B)
         
-        return Double(a.intersection(b).count) / sqrt(Double(a.count) * Double(b.count))
+        return Sample(a.intersection(b).count) / sqrt(Sample(a.count) * Sample(b.count))
     }
     
     /** Jaccard index **/
-    private func jaccardIndex(A: [Double], B: [Double]) -> Double {
+    private func jaccardIndex(A: Samples, B: Samples) -> Sample {
         let a = Set(A)
         let b = Set(B)
         
-        return Double(a.intersection(b).count) / Double(a.union(b).count)
+        return Sample(a.intersection(b).count) / Sample(a.union(b).count)
     }
     
     /** Jaccard distance **/
-    private func jaccardDist(A: [Double], B: [Double]) -> Double {
+    private func jaccardDist(A: Samples, B: Samples) -> Sample {
         return 1.0 - jaccardIndex(A: A, B: B)
     }
     
     /** Dice coeeficient **/
-    private func diceCoef(A: [Double], B: [Double]) -> Double {
+    private func diceCoef(A: Samples, B: Samples) -> Sample {
         let a = Set(A)
         let b = Set(B)
         
-        return 2.0 * Double(a.intersection(b).count) / (Double(a.count) + Double(b.count))
+        return 2.0 * Sample(a.intersection(b).count) / (Sample(a.count) + Sample(b.count))
     }
     
     /** Hamming distance **/
-    private func hammingDist(A: [Double], B: [Double]) -> Double {
-        var x: Double = 0
+    private func hammingDist(A: Samples, B: Samples) -> Sample {
+        var x: Sample = 0
         
         if A.isEmpty {
             return x
@@ -162,16 +166,16 @@ class EMSimilarity {
         return x
     }
     
-    private let encforceEqualVectorSizes: Set<EMSimilarityMode> = [.Cosine, .Tanimoto, .Hamming]
+    private let enforceEqualVectorSizes: Set<EMSimilarityMode> = [.Cosine, .Tanimoto, .Hamming]
     private let bailOnEmptyInput: Set<EMSimilarityMode> = [.Cosine, .Tanimoto, .Ochiai]
     private let allowEmptyInputs: Set<EMSimilarityMode> = [.Hamming]
     
     /**
      * Main compute mode
-     * Double types
+     * Sample types
      * Returns the similarity results or -1.0 on caught error
      */
-    func compute(A: [Double], B: [Double]) -> Double {
+    func compute(A: Samples, B: Samples) -> Sample {
         // get the mode
         var mode = EMSimilarityMode.Cosine
         if let _mode = self.getCurrentSimMode() {
@@ -192,8 +196,8 @@ class EMSimilarity {
             return -1
         }
         
-        // look for vector size mismatch for modes in encforceEqualVectorSizes
-        if encforceEqualVectorSizes.contains(mode) && A.count != B.count {
+        // look for vector size mismatch for modes in enforceEqualVectorSizes
+        if enforceEqualVectorSizes.contains(mode) && A.count != B.count {
             if let mismatchMode = self.getCurrentMismatchMode() {
                 switch mismatchMode {
                 case .Bail:
@@ -201,7 +205,7 @@ class EMSimilarity {
                 case .Truncate:
                     let a = A.count < B.count ? A : B
                     let _b = A.count < B.count ? B : A
-                    var b = [Double]()
+                    var b = Samples()
                     if a.count > 0 {
                         for i in 0...a.count-1 {
                             b.append(_b[i])
